@@ -1,0 +1,35 @@
+---
+# PersistentVolume - Storage resource in the cluster
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: spring-boot-pv
+  labels:
+    type: local
+    app: spring-boot-demo
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/spring-boot"
+    type: DirectoryOrCreate
+
+---
+# PersistentVolumeClaim - Request for storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: spring-boot-pvc
+  namespace: spring-boot-demo
+  labels:
+    app: spring-boot-demo
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi

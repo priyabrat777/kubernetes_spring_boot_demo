@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spring-boot-demo
+  labels:
+    name: spring-boot-demo
+    environment: development

@@ -1,0 +1,38 @@
+---
+# ClusterIP Service - Internal communication within cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-service
+  namespace: spring-boot-demo
+  labels:
+    app: spring-boot-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: spring-boot-demo
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+
+---
+# NodePort Service - External access for Minikube
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-boot-nodeport
+  namespace: spring-boot-demo
+  labels:
+    app: spring-boot-demo
+spec:
+  type: NodePort
+  selector:
+    app: spring-boot-demo
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    nodePort: 30080  # Fixed NodePort for easy access
+    protocol: TCP

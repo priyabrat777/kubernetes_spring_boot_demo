@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: spring-boot-demo
+  labels:
+    app: postgres
+data:
+  POSTGRES_DB: demodb
+  POSTGRES_USER: demouser
