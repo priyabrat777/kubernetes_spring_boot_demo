@@ -1,11 +1,21 @@
 package com.demo.k8s.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
+import java.io.Serializable;
+
+/**
+ * Data item entity for demonstration purposes.
+ * Implements Serializable for Redis caching support.
+ */
 @Entity
 @Table(name = "data_items")
-public class DataItem {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DataItem implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @Column(name = "id", length = 36)

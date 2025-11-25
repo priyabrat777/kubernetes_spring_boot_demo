@@ -4,6 +4,8 @@ import com.demo.k8s.model.DataItem;
 import com.demo.k8s.service.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,12 @@ public class DemoController {
 
     @Autowired
     private DataService dataService;
+
+    @Autowired(required = false)
+    private CacheManager cacheManager;
+
+    @Autowired(required = false)
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Value("${app.environment:default}")
     private String environment;
@@ -59,6 +67,26 @@ public class DemoController {
             response.put("hostname", "unknown");
             response.put("hostAddress", "unknown");
         }
+
+        // Add Redis/Cache status
+        Map<String, Object> cacheInfo = new HashMap<>();
+        if (cacheManager != null && redisTemplate != null) {
+            try {
+                redisTemplate.getConnectionFactory().getConnection().ping();
+                cacheInfo.put("enabled", true);
+                cacheInfo.put("connected", true);
+                cacheInfo.put("cacheCount", cacheManager.getCacheNames().size());
+                cacheInfo.put("cacheNames", cacheManager.getCacheNames());
+            } catch (Exception e) {
+                cacheInfo.put("enabled", true);
+                cacheInfo.put("connected", false);
+                cacheInfo.put("error", "Redis connection failed: " + e.getMessage());
+            }
+        } else {
+            cacheInfo.put("enabled", false);
+            cacheInfo.put("connected", false);
+        }
+        response.put("cache", cacheInfo);
 
         return ResponseEntity.ok(response);
     }

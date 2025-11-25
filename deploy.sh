@@ -27,10 +27,23 @@ kubectl apply -f k8s/secret.yaml
 # Step 4: Create Persistent Volumes
 echo -e "${BLUE}💾 Step 4: Creating Persistent Volumes...${NC}"
 kubectl apply -f k8s/postgres-pv-pvc.yaml
+kubectl apply -f k8s/redis-pv-pvc.yaml
 kubectl apply -f k8s/pv-pvc.yaml
 
-# Step 5: Deploy PostgreSQL
-echo -e "${BLUE}🐘 Step 5: Deploying PostgreSQL...${NC}"
+# Step 5: Deploy Redis
+echo -e "${BLUE}🔴 Step 5: Deploying Redis...${NC}"
+kubectl apply -f k8s/redis-configmap.yaml
+kubectl apply -f k8s/redis-deployment.yaml
+kubectl apply -f k8s/redis-service.yaml
+
+# Wait for Redis to be ready
+echo -e "${BLUE}⏳ Waiting for Redis to be ready...${NC}"
+kubectl wait --for=condition=ready pod -l app=redis -n spring-boot-demo --timeout=120s
+
+echo -e "${GREEN}✅ Redis is ready!${NC}"
+
+# Step 6: Deploy PostgreSQL
+echo -e "${BLUE}🐘 Step 6: Deploying PostgreSQL...${NC}"
 kubectl apply -f k8s/postgres-deployment.yaml
 kubectl apply -f k8s/postgres-service.yaml
 
@@ -40,8 +53,8 @@ kubectl wait --for=condition=ready pod -l app=postgres -n spring-boot-demo --tim
 
 echo -e "${GREEN}✅ PostgreSQL is ready!${NC}"
 
-# Step 6: Deploy Spring Boot Application
-echo -e "${BLUE}☕ Step 6: Deploying Spring Boot Application...${NC}"
+# Step 7: Deploy Spring Boot Application
+echo -e "${BLUE}☕ Step 7: Deploying Spring Boot Application...${NC}"
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 kubectl apply -f k8s/hpa.yaml
@@ -65,4 +78,7 @@ echo "   Option 2: kubectl port-forward -n spring-boot-demo svc/spring-boot-serv
 echo -e "\n📝 Useful commands:"
 echo "   View logs: kubectl logs -f -l app=spring-boot-demo -n spring-boot-demo"
 echo "   View PostgreSQL logs: kubectl logs -f -l app=postgres -n spring-boot-demo"
+echo "   View Redis logs: kubectl logs -f -l app=redis -n spring-boot-demo"
 echo "   Connect to DB: kubectl exec -it \$(kubectl get pod -n spring-boot-demo -l app=postgres -o jsonpath='{.items[0].metadata.name}') -n spring-boot-demo -- psql -U demouser -d demodb"
+echo "   Connect to Redis: kubectl exec -it redis-0 -n spring-boot-demo -- redis-cli"
+echo "   Test cache: curl http://localhost:8080/api/cache/stats"
