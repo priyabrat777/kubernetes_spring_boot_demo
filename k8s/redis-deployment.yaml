@@ -18,6 +18,23 @@ spec:
         app: redis
         version: v1
     spec:
+      # Init container to fix permissions on the data volume
+      initContainers:
+      - name: fix-permissions
+        image: busybox:latest
+        command:
+        - sh
+        - -c
+        - |
+          chown -R 999:999 /data
+          chmod -R 755 /data
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        securityContext:
+          runAsUser: 0
+          runAsNonRoot: false
+      
       containers:
       - name: redis
         image: redis:7.2-alpine
